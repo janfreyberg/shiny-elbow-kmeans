@@ -11,6 +11,7 @@ library(ggplot2)
 library(magrittr)
 library(tibble)
 library(dplyr)
+library(broom)
 
 shinyServer(function(input, output) {
   
@@ -34,6 +35,7 @@ shinyServer(function(input, output) {
   # Make the elbow plot
   output$elbowPlot <- renderPlot({
     # get the summary data out of the data frame
+    # cat("whatever")
     kclusts() %>%
       group_by(k) %>%
       do(glance(.$kclust[[1]])) %>%
@@ -41,9 +43,8 @@ shinyServer(function(input, output) {
       ggplot(aes(x=k, y=tot.withinss)) +
       geom_line() +
       geom_point(shape = 1, size = 3, fill = 'white') +
-      # Make it nice
       theme_bw() +
-      scale_x_discrete(breaks=krange, labels=krange) +
+      scale_x_discrete() +
       labs(y = "(Residual) Variation not explained",
            x = "Number of clusters")
   })
@@ -62,7 +63,6 @@ shinyServer(function(input, output) {
   # Plot the raw data
   output$clusterPlot <- renderPlot({
     set.seed(2017) # so that the jitter isn't redone all the time
-    cat("whatever")
     centers <- kclusts() %>% filter(k==selectedk()) %>% group_by(k) %>% do(tidy(.$kclust[[1]])) %>% mutate(y = x1, x = 1)
     
     kclusts() %>%
@@ -71,14 +71,14 @@ shinyServer(function(input, output) {
         # Add the original points
         geom_point(size=4, position=position_jitter(width=0.15)) +
         # Add the cluster centers
-        geom_point(data=centers, aes(colour=cluster), size = 20, shape = '*', show_guide=FALSE) +
+        geom_point(data=centers, aes(colour=cluster), size = 20, shape = '*', show.legend=FALSE) +
         # Make it pretty
         xlim(0.5, 2.5) + scale_color_discrete() + scale_x_discrete() + theme_bw() +
         theme(legend.position=c(0.8, 0.5)) + labs(x="", y="Your Variable.", color="Cluster")
   })
   
+  # Create output for the results: cluster means, etc
   output$kmeansResults <- renderText({
-    
     kclust <- kclusts() %>% filter(k==selectedk()) %>% .$kclust %>% .[[1]]
     centers <- kclust %$% toString(round(centers, digits=2))
     variance <- round(100*(kclust$totss-kclust$tot.withinss)/kclust$totss, digits=2)
