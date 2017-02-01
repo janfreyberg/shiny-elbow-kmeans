@@ -17,11 +17,16 @@ shinyServer(function(input, output) {
   
   # Obtain the data
   inputData <- reactive({
-    tibble(y = str_trim(input$datatext) %>%
+    tibble(x = str_trim(input$datatext1) %>%
                 str_split('(\n|,|[:space:])+') %>%
                 unlist() %>%
                 as.numeric() %>%
-                .[!is.na(.)])
+                .[!is.na(.)],
+           y = str_trim(input$datatext2) %>%
+               str_split('(\n|,|[:space:])+') %>%
+               unlist() %>%
+               as.numeric() %>%
+               .[!is.na(.)])
   })
   
   # Do the cluster analysis (reruns only if input changes)
@@ -29,7 +34,7 @@ shinyServer(function(input, output) {
     set.seed(2017)
     data.frame(k=1:min(15, nrow(inputData())-1)) %>%
       group_by(k) %>%
-      do(kclust=kmeans(inputData()$y, .$k, iter.max=50))
+      do(kclust=kmeans(as.matrix.data.frame(inputData()), .$k, iter.max=50))
   })
   
   # Make the elbow plot
@@ -38,7 +43,7 @@ shinyServer(function(input, output) {
     # cat("whatever")
     xlabs <- as.character(kclusts()$k)
     kclusts() %>%
-      group_by(k) %>%
+      ungroup() %>% group_by(k) %>%
       do(glance(.$kclust[[1]])) %>%
       # Do the plot:
       ggplot(aes(x=k, y=tot.withinss)) +
@@ -64,20 +69,23 @@ shinyServer(function(input, output) {
   
   # Plot the raw data
   output$clusterPlot <- renderPlot({
-    set.seed(2017) # so that the jitter isn't redone all the time
-    centers <- kclusts() %>% filter(k==selectedk()) %>% group_by(k) %>% do(tidy(.$kclust[[1]])) %>% mutate(y = x1, x = 1)
+    centers <- kclusts() %>% filter(k==selectedk()) %>%
+      ungroup() %>% group_by(k) %>%
+      do(tidy(.$kclust[[1]])) %>% mutate(x = x1, y = x2)
     
     kclusts() %>%
-      filter(k==selectedk()) %>% group_by(k) %>% do(augment(.$kclust[[1]], inputData())) %>% mutate(x = 1) %>%
+      filter(k==selectedk()) %>%
+      ungroup() %>% group_by(k) %>%
+      do(augment(.$kclust[[1]], inputData())) %>%
       ggplot(aes(x=x, y=y, colour=.cluster)) +
         # Add the original points
-        geom_point(size=4, position=position_jitter(width=0.15)) +
+        geom_point(size=4) +
         # Add the cluster centers
         geom_point(data=centers, aes(colour=cluster), size = 20, shape = '*', show.legend=FALSE) +
         # Make it pretty
-        scale_color_discrete() + scale_x_discrete() +
+        scale_color_discrete() +
         theme_bw() +
-        theme(legend.position=c(0.8, 0.5)) + labs(x="", y="Your Variable.", color="Cluster")
+        theme(legend.position=c(0.8, 0.5)) + labs(x="Variable 1", y="Variable 2", color="Cluster")
   })
   
   # Create output for the results: cluster means, etc

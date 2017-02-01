@@ -10,19 +10,26 @@ library(shiny)
 shinyUI(fluidPage(
 
   # Application title
-  titlePanel("Univariate k-Means Clustering with elbow method"),
+  titlePanel("Bivariate k-Means Clustering with elbow method"),
   helpText("Find the code for this at http://github.com/janfreyberg/shiny-elbow-kmeans.",
-           "Find the accompanying blogpost at http://www.janfreyberg.com/blog/2017-01-27-interactive-univariate-clustering/"),
+           "Find the accompanying blogpost at <missing>"),
   hr(),
   # Sidebar with a slider input for number of bins
   fluidRow(
     column(5,
            h3("Step 1: Data Entry"),
            p("In the box below, enter your data in whatever format you'd like."),
-           textAreaInput(
-             "datatext",
-             "Paste Data (comma/tab/space separated)",
-             value = "1, 2, 3, 60, 70, 80, 100, 220, 230, 250"
+           fluidRow(
+             column(6, textAreaInput(
+              "datatext1",
+              "Paste Data (Variable 1) (comma/tab/space separated)",
+              value = "1, 2, 3, 60, 70, 80, 100, 220, 230, 250"
+            )),
+             column(6, textAreaInput(
+               "datatext2",
+               "Paste Data (Variable 2) (comma/tab/space separated)",
+               value = "4, 3, 2, 60, 2, 3, 2, 210, 215, 212"
+            ))
            ),
            h3("Step 2: Find the elbow"),
            # Show the elbow plot
