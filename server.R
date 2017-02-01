@@ -36,6 +36,7 @@ shinyServer(function(input, output) {
   output$elbowPlot <- renderPlot({
     # get the summary data out of the data frame
     # cat("whatever")
+    xlabs <- as.character(kclusts()$k)
     kclusts() %>%
       group_by(k) %>%
       do(glance(.$kclust[[1]])) %>%
@@ -44,7 +45,8 @@ shinyServer(function(input, output) {
       geom_line() +
       geom_point(shape = 1, size = 3, fill = 'white') +
       theme_bw() +
-      scale_x_discrete() +
+      scale_x_continuous(breaks=kclusts()$k,
+                         labels=as.character(kclusts()$k)) +
       labs(y = "(Residual) Variation not explained",
            x = "Number of clusters")
   })
@@ -73,7 +75,8 @@ shinyServer(function(input, output) {
         # Add the cluster centers
         geom_point(data=centers, aes(colour=cluster), size = 20, shape = '*', show.legend=FALSE) +
         # Make it pretty
-        xlim(0.5, 2.5) + scale_color_discrete() + scale_x_discrete() + theme_bw() +
+        scale_color_discrete() + scale_x_discrete() +
+        theme_bw() +
         theme(legend.position=c(0.8, 0.5)) + labs(x="", y="Your Variable.", color="Cluster")
   })
   
