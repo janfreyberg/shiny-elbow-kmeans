@@ -11,8 +11,8 @@ shinyUI(fluidPage(
 
   # Application title
   titlePanel("Bivariate k-Means Clustering with elbow method"),
-  helpText("Find the code for this at https://github.com/janfreyberg/shiny-elbow-kmeans/tree/bivariate.",
-           "Find the accompanying blogpost at <missing>"),
+  helpText("The univariate version (for 1-dimensional data) is at http://shiny.janfreyberg.com/elbow-kmeans.",
+           "Find the code for this at https://github.com/janfreyberg/shiny-elbow-kmeans/tree/bivariate."),
   hr(),
   # Sidebar with a slider input for number of bins
   fluidRow(
