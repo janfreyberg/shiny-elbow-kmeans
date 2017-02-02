@@ -91,11 +91,20 @@ shinyServer(function(input, output) {
   # Create output for the results: cluster means, etc
   output$kmeansResults <- renderText({
     kclust <- kclusts() %>% filter(k==selectedk()) %>% .$kclust %>% .[[1]]
-    centers <- kclust %$% toString(round(centers, digits=2))
+    centers <- kclust %$% round(centers, digits=2)
     variance <- round(100*(kclust$totss-kclust$tot.withinss)/kclust$totss, digits=2)
     
+    formattedTable <- ""
+    
+    for(row in 1:nrow(centers)){
+      formattedTable = paste0(formattedTable, "Center ", row,
+                              ": x=", centers[row, 1], ", y=", centers[row, 2],
+                              "\n")
+    }
+    
     paste0("You chose ", selectedk(), ifelse(selectedk()>1, " clusters.", " cluster."), "\n\n",
-           ifelse(selectedk()>1, "The cluster centers are:\n", "The cluster center (i.e. overall mean) is:\n"), centers, "\n\n",
+           ifelse(selectedk()>1, "The cluster centers are:\n",
+                  "The cluster center (i.e. overall mean) is:\n"), formattedTable, "\n\n",
            "This clustering accounts for ", variance, "% of the total variance.")
   })
 
