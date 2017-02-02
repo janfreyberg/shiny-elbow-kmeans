@@ -85,7 +85,7 @@ shinyServer(function(input, output) {
         # Make it pretty
         scale_color_discrete() +
         theme_bw() +
-        theme(legend.position=c(0.8, 0.5)) + labs(x="Variable 1", y="Variable 2", color="Cluster")
+        theme(legend.position="right") + labs(x="Variable 1", y="Variable 2", color="Cluster")
   })
   
   # Create output for the results: cluster means, etc
